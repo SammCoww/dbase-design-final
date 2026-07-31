@@ -93,7 +93,7 @@ To confirm that the data loaded:
 mysql -u root -p finaldb -e "SELECT * FROM Product; SELECT * FROM Purchase; SELECT * FROM Item;"
 ```
 
-## Run the Python connection check
+## Run the Python console application
 
 Create or activate a virtual environment if desired, then install the only Python dependency:
 
@@ -107,18 +107,18 @@ Activate it in Windows PowerShell:
 .\.venv\Scripts\Activate.ps1
 ```
 
-Install the connector and run the script:
+Install the connector and run the application:
 
 ```powershell
 python -m pip install mysql-connector-python
 python logic.py
 ```
 
-Expected output:
+After connecting, the menu supports:
 
-```text
-Connected to MySQL!
-```
+- viewing all products or searching by name and maximum price;
+- adding a product;
+- viewing a customer's orders.
 
 `logic.py` currently connects with these hard-coded settings:
 
@@ -130,7 +130,7 @@ password: root
 database: finaldb
 ```
 
-If your MySQL password or connection settings differ, edit the `mysql.connector.connect(...)` call in `logic.py` before running it. The script only tests the connection; it does not create tables, seed data, or provide an application interface.
+If your MySQL password or connection settings differ, edit the `mysql.connector.connect(...)` call in `logic.py` before running it. The application does not create tables or seed data; run the schema and seed steps first.
 
 ## Reset the local database
 
