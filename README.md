@@ -1,153 +1,118 @@
-# Database Design Project
+# E-Commerce Database Requirements
 
-This repository contains a small MySQL database for customers, credit cards, products, purchases, and purchase items. It also includes sample data, an entity-relationship diagram, and a Python script that verifies the database connection.
+## System Overview
 
-## Repository contents
+The system is a small e-commerce database that stores customers, payment cards, products, purchases, and purchase items. It supports basic product browsing, product management, and customer order history.
 
-```text
-.
-|-- db-schema.sql              # Creates the database tables
-|-- seed-data.sql              # Inserts sample products, purchases, and items
-|-- logic.py                   # Connects to MySQL and prints a success message
-`-- ER Diagrams/
-    |-- ER-Diagram.drawio      # Editable draw.io source
-    `-- ER-Diagram.png         # Diagram image
-```
+## Data Requirements
 
-## Requirements
+### Customer
 
-- MySQL Server 8.0 or newer
-- MySQL client (`mysql` command)
-- Python 3.9 or newer
-- `mysql-connector-python`
+The system must store:
 
-The instructions below use Windows PowerShell. They assume the MySQL user is `root`, MySQL is running locally, and the server listens on port `3306`.
+- A unique customer ID
+- Customer name
+- Phone number
+- Shipping address
 
-## Install MySQL
+### Credit Card
 
-1. Download **MySQL Installer for Windows** from [mysql.com/downloads](https://dev.mysql.com/downloads/installer/).
-2. Choose the Developer Default setup, or install at least **MySQL Server** and **MySQL Shell/Client**.
-3. During configuration, choose a root password. The sample `logic.py` expects the password `root`; use that password for the simplest setup, or update `logic.py` later.
-4. Leave the default port as `3306` and configure MySQL to run as a Windows service.
+The system must store:
 
-Check the installation from PowerShell:
+- A unique credit-card number
+- Name on the card
+- CVV
+- Expiration date
+- Optional PIN
+- The customer who owns the card
 
-```powershell
-mysql --version
-```
+Each credit card must belong to an existing customer.
 
-If `mysql` is not recognized, run it using the full path, commonly:
+### Product
 
-```powershell
-& 'C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe' --version
-```
+The system must store:
 
-If you use a non-root MySQL user, replace the username, password, and database values in `logic.py` before running it.
+- A unique product ID
+- Product name
+- Price
+- Amount currently in stock
 
-## Create the local database
+Product price and stock amounts cannot be negative.
 
-Open a MySQL session as an administrator:
+### Purchase
 
-```powershell
-mysql -u root -p
-```
+The system must store:
 
-Enter the root password when prompted, then create the database:
+- A unique purchase ID
+- The customer who placed the purchase
+- The credit card used
+- The purchase date and time
+- The purchase status, such as `Pending`
 
-```sql
-CREATE DATABASE finaldb;
-EXIT;
-```
+Each purchase must reference an existing customer and credit card.
 
-From the repository root, load the schema:
+### Item
 
-```powershell
-mysql -u root -p finaldb < db-schema.sql
-```
+The system must store:
 
-The schema creates these tables:
+- The purchase containing the item
+- The product purchased
+- The quantity purchased
 
-| Table | Purpose |
-| --- | --- |
-| `Customer` | Stores customer IDs. |
-| `Credit_Card` | Stores credit-card numbers. |
-| `Product` | Stores product names, prices, and stock amounts. |
-| `Purchase` | Links a customer and credit card to a purchase and status. |
-| `Item` | Links purchases to products and stores quantities. |
+Each product can appear only once per purchase. The purchase and product combination uniquely identifies an item.
 
-`Item` uses `(Purchase_ID, Product_ID)` as a composite primary key. `Purchase` references `Customer` and `Credit_Card`; `Item` references `Purchase` and `Product`.
+## Business Rules
 
-## Seed the database
+1. A customer may own multiple credit cards.
+2. A customer may place multiple purchases.
+3. A purchase must belong to one customer and use one credit card.
+4. A purchase may contain multiple products.
+5. A product may appear in multiple purchases.
+6. A purchase item must reference an existing purchase and product.
+7. Product names are required, and prices and stock amounts must be zero or greater.
 
-Load the complete sample dataset, including customers and credit cards:
+## Use Cases
 
-```powershell
-mysql -u root -p finaldb < seed-data.sql
-```
+### UC-1: View All Products
 
-The sample data contains six customers, six credit cards, ten products, ten purchases, and twenty purchase items. The credit-card values are test data only.
+**Actor:** Store employee or customer  
+**Goal:** View the available products.
 
-To confirm that the data loaded:
+1. The actor selects “View products.”
+2. The system retrieves each product's ID, name, price, and stock amount.
+3. The system displays the products sorted by name.
+4. If no products exist, the system displays “No products found.”
 
-```powershell
-mysql -u root -p finaldb -e "SELECT * FROM Product; SELECT * FROM Purchase; SELECT * FROM Item;"
-```
+### UC-2: Search for Products
 
-## Run the Python console application
+**Actor:** Store employee or customer  
+**Goal:** Find products by name and maximum price.
 
-Create or activate a virtual environment if desired, then install the only Python dependency:
+1. The actor enters optional search text.
+2. The actor enters a maximum price.
+3. The system returns matching products whose names contain the search text and whose prices do not exceed the maximum.
+4. The system displays the matching products sorted by name.
 
-```powershell
-python -m venv .venv
-```
+### UC-3: Add a Product
 
-Activate it in Windows PowerShell:
+**Actor:** Store employee  
+**Goal:** Add a product to inventory.
 
-```powershell
-.\.venv\Scripts\Activate.ps1
-```
+1. The employee enters a product name, price, and stock amount.
+2. The system validates that the name is present and that price and stock are not negative.
+3. The system stores the new product and assigns it a unique product ID.
+4. The system confirms that the product was added.
 
-Install the connector and run the application:
+### UC-4: View Customer Orders
 
-```powershell
-python -m pip install mysql-connector-python
-python logic.py
-```
+**Actor:** Store employee or customer  
+**Goal:** Review a customer's purchase history.
 
-After connecting, the menu supports:
+1. The actor enters a customer ID.
+2. The system finds purchases for that customer.
+3. The system displays each order's ID, status, timestamp, product, quantity, and price.
+4. If the customer has no orders, the system displays “No orders found.”
 
-- viewing all products or searching by name and maximum price;
-- adding a product;
-- viewing a customer's orders.
+## Scope
 
-`logic.py` currently connects with these hard-coded settings:
-
-```text
-host: localhost
-port: 3306
-user: root
-password: root
-database: finaldb
-```
-
-If your MySQL password or connection settings differ, edit the `mysql.connector.connect(...)` call in `logic.py` before running it. The application does not create tables or seed data; run the schema and seed steps first.
-
-## Reset the local database
-
-To remove and recreate this development database, run the following from a MySQL session:
-
-```sql
-DROP DATABASE finaldb;
-CREATE DATABASE finaldb;
-EXIT;
-```
-
-Then repeat the schema and seed steps above. Do not run this against a database containing data you need to keep.
-
-## Troubleshooting
-
-- **`mysql` is not recognized:** add the MySQL `bin` directory to `PATH`, or use the full path to `mysql.exe` on Windows.
-- **Connection refused:** confirm the MySQL service is running and that port `3306` is available.
-- **Access denied:** verify the username and password, then make the same values match `logic.py`.
-- **Foreign-key errors while seeding:** load `db-schema.sql` first, then run the complete `seed-data.sql` file.
-- **`ModuleNotFoundError: mysql`:** run `python -m pip install mysql-connector-python` in the same Python environment used to run `logic.py`.
+The current system covers product lookup, product creation, and order-history lookup. Customer registration, checkout processing, payment authorization, inventory deduction, and order-status updates are outside the current scope.
