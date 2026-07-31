@@ -1,8 +1,19 @@
 CREATE TABLE Customer (
-    Customer_ID                 INT AUTO_INCREMENT PRIMARY KEY
+    Customer_ID                 INT AUTO_INCREMENT PRIMARY KEY,
+    Customer_Name               VARCHAR(100) NOT NULL,
+    PhoneNumber                 VARCHAR(20),
+    ShippingAddress             VARCHAR(255)
+
 );
 CREATE TABLE Credit_Card(
-    Credit_Card_Number          VARCHAR(19) PRIMARY KEY
+    Credit_Card_Number          VARCHAR(19) PRIMARY KEY,
+    NameOnCard                  VARCHAR(100) NOT NULL,
+    CVV                         VARCHAR(4) NOT NULL,
+    ExpirationDate              DATE NOT NULL,
+    Pin                         VARCHAR(4),
+    Customer_ID                 INT NOT NULL,
+    FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID)
+
 );
 
 

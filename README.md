@@ -79,19 +79,13 @@ The schema creates these tables:
 
 ## Seed the database
 
-`seed-data.sql` expects customer IDs `1`, `2`, and `3`, plus the credit-card numbers used by its purchase rows. Add those parent rows first:
-
-```powershell
-mysql -u root -p finaldb -e "INSERT INTO Customer (Customer_ID) VALUES (1), (2), (3); INSERT INTO Credit_Card (Credit_Card_Number) VALUES ('4111111111111111'), ('5500000000000004'), ('340000000000009');"
-```
-
-Then load the sample products, purchases, and items:
+Load the complete sample dataset, including customers and credit cards:
 
 ```powershell
 mysql -u root -p finaldb < seed-data.sql
 ```
 
-The sample data contains five products, four purchases, and seven purchase items.
+The sample data contains six customers, six credit cards, ten products, ten purchases, and twenty purchase items. The credit-card values are test data only.
 
 To confirm that the data loaded:
 
@@ -155,5 +149,5 @@ Then repeat the schema and seed steps above. Do not run this against a database 
 - **`mysql` is not recognized:** add the MySQL `bin` directory to `PATH`, or use the full path to `mysql.exe` on Windows.
 - **Connection refused:** confirm the MySQL service is running and that port `3306` is available.
 - **Access denied:** verify the username and password, then make the same values match `logic.py`.
-- **Foreign-key errors while seeding:** load the customer and credit-card parent rows first, as shown above.
+- **Foreign-key errors while seeding:** load `db-schema.sql` first, then run the complete `seed-data.sql` file.
 - **`ModuleNotFoundError: mysql`:** run `python -m pip install mysql-connector-python` in the same Python environment used to run `logic.py`.
